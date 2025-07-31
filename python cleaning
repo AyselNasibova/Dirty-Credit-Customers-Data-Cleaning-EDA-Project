@@ -1,0 +1,104 @@
+# 📥 1. Import the CSV file from Google Drive
+
+import pandas as pd
+from google.colab import drive
+drive.mount('/content/drive')
+
+file_path = '/content/drive/My Drive/dirty_credit_customers.csv'
+df_csv = pd.read_csv(file_path)
+df_csv
+
+# 📊 2. View DataFrame structure and check for missing values
+
+df_csv.info()
+print(df_csv.isnull().sum())
+
+# 🧹 3. Replace missing CreditScore values with the median
+
+df_csv['CreditScore'] = df_csv['CreditScore'].fillna(df_csv['CreditScore'].median())
+
+# 🧼 4. Clean whitespace from the FullName field
+
+df_csv['FullName'] = df_csv['FullName'].str.strip()
+
+# 🧽 5. Identify and remove outliers in Age column
+
+print(df_csv[df_csv['Age'] < 18])
+print(df_csv[df_csv['Age'] > 90])
+df_csv = df_csv[(df_csv['Age'] >= 18) & (df_csv['Age'] <= 90)]
+
+# 🗓️ 6. Fix formatting issues in the JoinDate column
+
+df_csv.loc[:, 'JoinDate'] = pd.to_datetime(df_csv['JoinDate'], errors='coerce')
+
+# 🗑️ 7. Drop rows where JoinDate could not be converted
+
+df_csv = df_csv.dropna(subset=['JoinDate'])
+
+# 🕒 8. Fill missing JoinDate values with a default date
+
+df_csv['JoinDate'] = df_csv['JoinDate'].fillna(pd.to_datetime('2020-01-01'))
+
+# 📈 9. Create a new column 'CreditLevel' based on CreditScore ranges
+
+def score_level(score):
+    if score >= 300 and score <= 579:
+        return "Very Poor"
+    elif score >= 580 and score <= 669:
+        return "Fair"
+    elif score >= 670 and score <= 739:
+        return "Good"
+    elif score >= 740 and score <= 799:
+        return "Very Good"
+    elif score >= 800 and score <= 850:
+        return "Excellent"
+    else:
+        return "Unknown"
+
+df_csv['CreditLevel'] = df_csv['CreditScore'].apply(score_level)
+df_csv[['CreditScore', 'CreditLevel']].head(10)
+
+# 🧾 10. Remove duplicate rows
+
+df_csv.drop_duplicates(inplace=True)
+
+# 🧼 11. Clean and standardize the Gender column
+
+df_csv['Gender'] = df_csv['Gender'].str.strip().str.lower()
+df_csv['Gender'] = df_csv['Gender'].replace({
+    'm': 'male',
+    'man': 'male',
+    'f': 'female',
+    'woman': 'female',
+    'femail': 'female'
+})
+
+# 💾 12. Save the cleaned data back to CSV
+
+df_csv.to_csv('/content/drive/My Drive/dirty_credit_customers.csv', index=False)
+!ls "/content/drive/My Drive/"
+
+# 📊 13. Exploratory Data Analysis (EDA): Credit Score Distribution
+
+import matplotlib.pyplot as plt
+
+plt.hist(df_csv['CreditScore'], bins=30, color='skyblue')
+plt.title('Credit Score Distribution')
+plt.xlabel('Credit Score')
+plt.ylabel('Frequency')
+plt.show()
+
+# 🔁 Optional: Re-fill CreditScore by average score within each level (if any NaN remains)
+
+df_csv['CreditScore'] = df_csv.groupby('CreditLevel')['CreditScore'].transform(lambda x: x.fillna(x.mean()))
+df_csv['CreditScore'] = df_csv['CreditScore'].astype(int)
+
+# 📊 14. Age distribution visualization
+
+import seaborn as sns
+
+sns.histplot(data=df_csv, x='Age', bins=20, kde=True, color='lightgreen')
+plt.title('Age Distribution with Density Curve')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+plt.show()  
