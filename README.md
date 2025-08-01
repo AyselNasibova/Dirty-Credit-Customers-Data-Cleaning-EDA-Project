@@ -23,9 +23,6 @@ credit-customers-cleaning-eda/
 │   └── dirty_credit_customers.csv      # Input dataset
 ├── notebooks/
 │   └── cleaning_and_eda.ipynb          # Full code notebook
-├── images/
-│   ├── credit_score_dist.png           # Histogram of Credit Scores
-│   └── age_distribution.png            # Histogram of Age
 ├── README.md                           # This documentation file
 ├── requirements.txt                    # Libraries used
 └── .gitignore
@@ -52,17 +49,7 @@ Visualizes customer age distribution after removing unrealistic entries like neg
 
 ---
 
-## 📈 Sample Visuals
 
-**Credit Score Distribution**
-
-![Credit Score Distribution](images/credit_score_dist.png)
-
-**Age Distribution**
-
-![Age Distribution](images/age_distribution.png)
-
----
 
 ## 📦 How to Use
 
